@@ -647,22 +647,30 @@ function loadModel(idx) {
   if (currentMesh) { scene.remove(currentMesh); currentMesh = null; }
 
   loader.load(models[idx].file, (gltf) => {
-    currentMesh = gltf.scene;
-    scene.add(currentMesh);
+    const model = gltf.scene;
 
-    // Centre and normalise — must happen after adding to scene
-    const box = new THREE.Box3().setFromObject(currentMesh);
+    // Wrap in a group so we can offset the model's own origin cleanly
+    const group = new THREE.Group();
+    group.add(model);
+    scene.add(group);
+
+    // Compute bounding box in world space
+    const box = new THREE.Box3().setFromObject(model);
     const centre = box.getCenter(new THREE.Vector3());
     const size   = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    // Move the mesh so its centre is at world origin
-    currentMesh.position.set(-centre.x, -centre.y, -centre.z);
-    currentMesh.scale.setScalar((1.2 / maxDim) * (state.scale / 100));
+    // Offset model inside group so bounding box centre = group origin
+    model.position.set(-centre.x, -centre.y, -centre.z);
 
-    // Reset camera and controls to a clean front-on position
-    const fitDist = 2.2;
-    camera.position.set(0, 0, fitDist);
+    // Scale the group to fit viewport
+    const targetSize = 1.8 * (state.scale / 100);
+    group.scale.setScalar(targetSize / maxDim);
+
+    currentMesh = group;
+
+    // Reset camera to clean front-on position
+    camera.position.set(0, 0, 2.5);
     camera.lookAt(0, 0, 0);
     controls.target.set(0, 0, 0);
     controls.update();
