@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Krosna — Backdrop Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Space+Mono:wght@400&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink-a: #e8d44d;
+    --ink-b: #a8cfd1;
+    --ink-c: #1a1a18;
+    --ui-bg: #f2ede6;
+    --ui-text: #1a1a18;
+    --ui-muted: #9a9490;
+    --ui-border: #d4cfc8;
+  }
+
+  body {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    background: var(--ui-bg);
+    color: var(--ui-text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--ui-bg);
+    border-right: 1px solid var(--ui-border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    gap: 24px;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .brand {
+    border-bottom: 1px solid var(--ui-border);
+    padding-bottom: 16px;
+  }
+
+  .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .brand-sub {
+    color: var(--ui-muted);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+    margin-bottom: 10px;
+  }
+
+  /* COLOUR PICKERS */
+  .colour-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .colour-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 2px;
+    border: 1px solid var(--ui-border);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .colour-swatch input[type="color"] {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -25%;
+    left: -25%;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+  }
+
+  .colour-label {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ui-text);
+    flex: 1;
+  }
+
+  .colour-hex {
+    font-size: 9px;
+    color: var(--ui-muted);
+    width: 52px;
+    text-align: right;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ROCK SELECTOR */
+  .rock-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rock-btn {
+    background: none;
+    border: 1px solid var(--ui-border);
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+    text-align: left;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rock-btn:hover { border-color: var(--ui-text); color: var(--ui-text); }
+  .rock-btn.active { border-color: var(--ui-text); color: var(--ui-text); background: rgba(0,0,0,0.04); }
+
+  .rock-btn .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ui-border);
+    flex-shrink: 0;
+  }
+  .rock-btn.active .dot { background: var(--ui-text); }
+
+  /* SLIDERS */
+  .slider-row {
+    margin-bottom: 12px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .slider-name {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+  }
+
+  .slider-val {
+    font-size: 9px;
+    color: var(--ui-text);
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 2px;
+    -webkit-appearance: none;
+    background: var(--ui-border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ui-text);
+    cursor: pointer;
+  }
+
+  /* GRAIN TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .toggle-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+  }
+
+  .toggle {
+    width: 28px; height: 14px;
+    background: var(--ui-border);
+    border-radius: 7px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    border: none;
+    outline: none;
+  }
+
+  .toggle.on { background: var(--ui-text); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    background: white;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: left 0.2s;
+  }
+
+  .toggle.on::after { left: 16px; }
+
+  /* PRESET PALETTES */
+  .palette-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .palette-chip {
+    display: flex;
+    gap: 2px;
+    cursor: pointer;
+    padding: 3px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: border-color 0.15s;
+  }
+
+  .palette-chip:hover { border-color: var(--ui-border); }
+  .palette-chip.active { border-color: var(--ui-text); }
+
+  .palette-chip span {
+    width: 14px; height: 14px;
+    border-radius: 1px;
+    display: block;
+  }
+
+  /* EXPORT */
+  .export-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--ui-text);
+    color: var(--ui-bg);
+    border: none;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+    margin-top: auto;
+  }
+
+  .export-btn:hover { opacity: 0.75; }
+
+  .footer-credit {
+    font-size: 8px;
+    color: var(--ui-muted);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+
+  /* CANVAS AREA */
+  #canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #canvas-wrap canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* GRAIN OVERLAY */
+  #grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    z-index: 5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    mix-blend-mode: multiply;
+  }
+
+  /* LOADING */
+  #loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    background: var(--ui-bg);
+    flex-direction: column;
+    gap: 12px;
+    transition: opacity 0.5s;
+  }
+
+  #loading.hidden { opacity: 0; pointer-events: none; }
+
+  .loading-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ui-muted);
+  }
+
+  .loading-bar {
+    width: 80px;
+    height: 1px;
+    background: var(--ui-border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loading-bar::after {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 40%;
+    background: var(--ui-text);
+    animation: slide 1s ease-in-out infinite;
+  }
+
+  @keyframes slide {
+    0% { left: -40%; }
+    100% { left: 140%; }
+  }
+
+  /* FORMAT INDICATOR */
+  #format-indicator {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 6;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="brand">
+    <div class="brand-name">Krosna</div>
+    <div class="brand-sub">Backdrop Generator</div>
+  </div>
+
+  <div>
+    <div class="section-label">Presets</div>
+    <div class="palette-row" id="palette-row"></div>
+  </div>
+
+  <div>
+    <div class="section-label">Colour Map</div>
+    <div class="colour-row">
+      <div class="colour-swatch" id="swatch-a" style="background:#e8d44d">
+        <input type="color" id="color-a" value="#e8d44d">
+      </div>
+      <span class="colour-label">Shadow ink</span>
+      <span class="colour-hex" id="hex-a">#e8d44d</span>
+    </div>
+    <div class="colour-row">
+      <div class="colour-swatch" id="swatch-b" style="background:#a8cfd1">
+        <input type="color" id="color-b" value="#a8cfd1">
+      </div>
+      <span class="colour-label">Light ink</span>
+      <span class="colour-hex" id="hex-b">#a8cfd1</span>
+    </div>
+    <div class="colour-row">
+      <div class="colour-swatch" id="swatch-c" style="background:#1a1a18">
+        <input type="color" id="color-c" value="#1a1a18">
+      </div>
+      <span class="colour-label">Background</span>
+      <span class="colour-hex" id="hex-c">#1a1a18</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Stone</div>
+    <div class="rock-grid" id="rock-grid">
+      <button class="rock-btn active" data-idx="0"><span class="dot"></span>Roche — Rides</button>
+      <button class="rock-btn" data-idx="1"><span class="dot"></span>Roche N°10</button>
+      <button class="rock-btn" data-idx="2"><span class="dot"></span>Stone 002</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Light & Form</div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="slider-name">Light angle</span>
+        <span class="slider-val" id="val-angle">45°</span>
+      </div>
+      <input type="range" id="sl-angle" min="0" max="360" value="45">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="slider-name">Light height</span>
+        <span class="slider-val" id="val-height">60%</span>
+      </div>
+      <input type="range" id="sl-height" min="10" max="90" value="60">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="slider-name">Scale</span>
+        <span class="slider-val" id="val-scale">100%</span>
+      </div>
+      <input type="range" id="sl-scale" min="40" max="200" value="100">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="slider-name">Contrast</span>
+        <span class="slider-val" id="val-contrast">50%</span>
+      </div>
+      <input type="range" id="sl-contrast" min="0" max="100" value="50">
+    </div>
+  </div>
+
+  <div>
+    <div class="section-label">Effects</div>
+    <div class="toggle-row">
+      <span class="toggle-label">Film grain</span>
+      <button class="toggle on" id="toggle-grain"></button>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Mis-register</span>
+      <button class="toggle" id="toggle-misreg"></button>
+    </div>
+    <div class="slider-row">
+      <div class="slider-header">
+        <span class="slider-name">Grain amount</span>
+        <span class="slider-val" id="val-grain">18%</span>
+      </div>
+      <input type="range" id="sl-grain" min="0" max="40" value="18">
+    </div>
+  </div>
+
+  <div style="margin-top:auto;">
+    <button class="export-btn" id="export-btn">↓ Export PNG</button>
+    <div class="footer-credit" id="credit"></div>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <div id="loading">
+    <div class="loading-text">Loading stone</div>
+    <div class="loading-bar"></div>
+  </div>
+  <div id="grain"></div>
+  <div id="format-indicator">drag to rotate</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ── GLTFLoader (inlined minimal) ──────────────────────────────────────────────
+// Using the CDN path directly
+const GLTF_URL = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+const OC_URL   = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+
+const { GLTFLoader }     = await import(GLTF_URL);
+const { OrbitControls }  = await import(OC_URL);
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const models = [
+  { file: 'roche_-_rides_a_cretes_lingoides.glb', credit: 'Roche — Rides à crêtes lingoides · Poly Pizza' },
+  { file: 'td_n6_-_roche_n10.glb',                credit: 'Roche N°10 · Poly Pizza' },
+  { file: 'stone002.glb',                          credit: 'Stone 002 · Poly Pizza' },
+];
+
+let currentModelIdx = 0;
+let currentMesh = null;
+let gradientMap = null;
+
+const state = {
+  colorA: '#e8d44d',
+  colorB: '#a8cfd1',
+  colorC: '#1a1a18',
+  angle: 45,
+  height: 60,
+  scale: 100,
+  contrast: 50,
+  grain: true,
+  misreg: false,
+  grainAmt: 18,
+};
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+const presets = [
+  { a: '#e8d44d', b: '#a8cfd1', c: '#1a1a18', name: 'Adriatic' },
+  { a: '#d4956a', b: '#f2e8d6', c: '#2c1f14', name: 'Terra' },
+  { a: '#7aab8a', b: '#e8f0e2', c: '#192b1f', name: 'Kras' },
+  { a: '#c4b5d4', b: '#f0ece8', c: '#1a1520', name: 'Dusk' },
+  { a: '#e8c84d', b: '#e84d4d', c: '#1a0a08', name: 'Riso' },
+  { a: '#4d8ae8', b: '#e8e0c8', c: '#0a1020', name: 'Pelago' },
+];
+
+// Build palette chips
+const paletteRow = document.getElementById('palette-row');
+presets.forEach((p, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'palette-chip' + (i === 0 ? ' active' : '');
+  chip.innerHTML = `<span style="background:${p.a}"></span><span style="background:${p.b}"></span><span style="background:${p.c}"></span>`;
+  chip.title = p.name;
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.palette-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    applyPreset(p);
+  });
+  paletteRow.appendChild(chip);
+});
+
+function applyPreset(p) {
+  state.colorA = p.a; state.colorB = p.b; state.colorC = p.c;
+  document.getElementById('color-a').value = p.a;
+  document.getElementById('color-b').value = p.b;
+  document.getElementById('color-c').value = p.c;
+  document.getElementById('swatch-a').style.background = p.a;
+  document.getElementById('swatch-b').style.background = p.b;
+  document.getElementById('swatch-c').style.background = p.c;
+  document.getElementById('hex-a').textContent = p.a;
+  document.getElementById('hex-b').textContent = p.b;
+  document.getElementById('hex-c').textContent = p.c;
+  updateGradientMap();
+  renderer.setClearColor(new THREE.Color(state.colorC));
+}
+
+// ── Three.js setup ─────────────────────────────────────────────────────────────
+const wrap = document.getElementById('canvas-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+renderer.toneMapping = THREE.NoToneMapping;
+wrap.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(state.colorC);
+
+const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 1000);
+camera.position.set(0, 0, 3);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.enableZoom = true;
+controls.minDistance = 0.5;
+controls.maxDistance = 10;
+
+// Lights
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+scene.add(dirLight);
+const ambLight = new THREE.AmbientLight(0xffffff, 0.3);
+scene.add(ambLight);
+
+// ── Gradient map (toon/risograph) ──────────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3), 16) / 255;
+  const g = parseInt(hex.slice(3,5), 16) / 255;
+  const b = parseInt(hex.slice(5,7), 16) / 255;
+  return [r, g, b];
+}
+
+function updateGradientMap() {
+  const steps = 64;
+  const data = new Uint8Array(steps * 4);
+  const cA = hexToRgb(state.colorA);
+  const cB = hexToRgb(state.colorB);
+  const contrast = state.contrast / 100;
+
+  for (let i = 0; i < steps; i++) {
+    let t = i / (steps - 1);
+    // Apply contrast curve
+    t = Math.pow(t, 1 + (contrast - 0.5) * 2);
+    // Clamp
+    t = Math.min(1, Math.max(0, t));
+    data[i*4]   = Math.round((cA[0] + (cB[0]-cA[0]) * t) * 255);
+    data[i*4+1] = Math.round((cA[1] + (cB[1]-cA[1]) * t) * 255);
+    data[i*4+2] = Math.round((cA[2] + (cB[2]-cA[2]) * t) * 255);
+    data[i*4+3] = 255;
+  }
+
+  if (gradientMap) gradientMap.dispose();
+  gradientMap = new THREE.DataTexture(data, steps, 1, THREE.RGBAFormat);
+  gradientMap.minFilter = THREE.LinearFilter;
+  gradientMap.magFilter = THREE.LinearFilter;
+  gradientMap.needsUpdate = true;
+
+  applyMaterialToScene();
+  scene.background = new THREE.Color(state.colorC);
+  renderer.setClearColor(new THREE.Color(state.colorC));
+}
+
+function applyMaterialToScene() {
+  if (!currentMesh || !gradientMap) return;
+  const mat = new THREE.MeshToonMaterial({ gradientMap });
+  currentMesh.traverse(node => {
+    if (node.isMesh) node.material = mat;
+  });
+}
+
+// ── Model loading ──────────────────────────────────────────────────────────────
+const loader = new GLTFLoader();
+
+function loadModel(idx) {
+  document.getElementById('loading').classList.remove('hidden');
+  if (currentMesh) { scene.remove(currentMesh); currentMesh = null; }
+
+  loader.load(models[idx].file, (gltf) => {
+    currentMesh = gltf.scene;
+    scene.add(currentMesh);
+
+    // Centre and normalise — must happen after adding to scene
+    const box = new THREE.Box3().setFromObject(currentMesh);
+    const centre = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    // Move the mesh so its centre is at world origin
+    currentMesh.position.set(-centre.x, -centre.y, -centre.z);
+    currentMesh.scale.setScalar((1.2 / maxDim) * (state.scale / 100));
+
+    // Reset camera and controls to a clean front-on position
+    const fitDist = 2.2;
+    camera.position.set(0, 0, fitDist);
+    camera.lookAt(0, 0, 0);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    updateLightPosition();
+    applyMaterialToScene();
+
+    document.getElementById('credit').textContent = models[idx].credit;
+    document.getElementById('loading').classList.add('hidden');
+  }, undefined, (err) => {
+    console.error(err);
+    document.getElementById('loading').classList.add('hidden');
+  });
+}
+
+// ── Light positioning ──────────────────────────────────────────────────────────
+function updateLightPosition() {
+  const a = (state.angle * Math.PI) / 180;
+  const h = state.height / 100;
+  const r = 5;
+  dirLight.position.set(
+    Math.cos(a) * r,
+    h * r,
+    Math.sin(a) * r
+  );
+}
+
+// ── Mis-registration effect (canvas post-process) ─────────────────────────────
+let misregCanvas = null;
+let misregCtx = null;
+
+function getMisregCanvas() {
+  if (!misregCanvas) {
+    misregCanvas = document.createElement('canvas');
+    misregCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;opacity:0.35;mix-blend-mode:screen;';
+    wrap.appendChild(misregCanvas);
+  }
+  return misregCanvas;
+}
+
+function drawMisreg() {
+  if (!state.misreg) {
+    if (misregCanvas) misregCanvas.style.display = 'none';
+    return;
+  }
+  const mc = getMisregCanvas();
+  mc.style.display = 'block';
+  mc.width = wrap.clientWidth;
+  mc.height = wrap.clientHeight;
+  const ctx = mc.getContext('2d');
+  ctx.clearRect(0, 0, mc.width, mc.height);
+
+  // Draw the main render offset by a few pixels in a second colour
+  const offset = 3;
+  const [r,g,b] = hexToRgb(state.colorA);
+  ctx.globalAlpha = 0.25;
+  ctx.drawImage(renderer.domElement, offset, offset);
+}
+
+// ── Animation loop ────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+  if (state.misreg) drawMisreg();
+}
+animate();
+
+// ── Resize ────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+  camera.aspect = wrap.clientWidth / wrap.clientHeight;
+  camera.updateProjectionMatrix();
+});
+
+// ── UI wiring ─────────────────────────────────────────────────────────────────
+function wireColor(id, swatchId, hexId, key) {
+  const input = document.getElementById(id);
+  const swatch = document.getElementById(swatchId);
+  const hex = document.getElementById(hexId);
+  function onColorChange() {
+    state[key] = input.value;
+    swatch.style.background = input.value;
+    hex.textContent = input.value;
+    document.querySelectorAll('.palette-chip').forEach(c => c.classList.remove('active'));
+    updateGradientMap();
+  }
+  input.addEventListener('input', onColorChange);
+  input.addEventListener('change', onColorChange);
+  swatch.addEventListener('click', () => input.click());
+}
+
+wireColor('color-a', 'swatch-a', 'hex-a', 'colorA');
+wireColor('color-b', 'swatch-b', 'hex-b', 'colorB');
+wireColor('color-c', 'swatch-c', 'hex-c', 'colorC');
+
+function wireSlider(id, valId, key, unit, multiplier, callback) {
+  const sl = document.getElementById(id);
+  const vl = document.getElementById(valId);
+  sl.addEventListener('input', () => {
+    const v = parseInt(sl.value);
+    state[key] = v;
+    vl.textContent = v * (multiplier || 1) + (unit || '');
+    if (callback) callback(v);
+  });
+}
+
+wireSlider('sl-angle', 'val-angle', 'angle', '°', 1, () => updateLightPosition());
+wireSlider('sl-height', 'val-height', 'height', '%', 1, () => updateLightPosition());
+wireSlider('sl-scale', 'val-scale', 'scale', '%', 1, (v) => {
+  if (currentMesh) {
+    const box = new THREE.Box3().setFromObject(currentMesh);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    currentMesh.scale.setScalar(1.2 * (v / 100));
+  }
+});
+wireSlider('sl-contrast', 'val-contrast', 'contrast', '%', 1, () => updateGradientMap());
+wireSlider('sl-grain', 'val-grain', 'grainAmt', '%', 1, (v) => {
+  document.getElementById('grain').style.opacity = v / 100;
+});
+
+// Rock selector
+document.querySelectorAll('.rock-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rock-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentModelIdx = parseInt(btn.dataset.idx);
+    loadModel(currentModelIdx);
+  });
+});
+
+// Toggles
+document.getElementById('toggle-grain').addEventListener('click', function() {
+  state.grain = !state.grain;
+  this.classList.toggle('on', state.grain);
+  document.getElementById('grain').style.display = state.grain ? 'block' : 'none';
+});
+
+document.getElementById('toggle-misreg').addEventListener('click', function() {
+  state.misreg = !state.misreg;
+  this.classList.toggle('on', state.misreg);
+  if (!state.misreg && misregCanvas) misregCanvas.style.display = 'none';
+});
+
+// Export
+document.getElementById('export-btn').addEventListener('click', () => {
+  renderer.render(scene, camera);
+  const link = document.createElement('a');
+  link.download = `krosna-backdrop-${Date.now()}.png`;
+  link.href = renderer.domElement.toDataURL('image/png');
+  link.click();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateGradientMap();
+loadModel(0);
+</script>
+</body>
+</html>
