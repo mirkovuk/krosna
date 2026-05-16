@@ -403,7 +403,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 #format-frame {
   position: absolute;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 3px solid rgba(255,255,255,0.12);
   pointer-events: none;
   z-index: 6;
   transition: all 0.3s ease;
@@ -581,7 +581,7 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
   <div id="grain"></div>
   <div id="format-frame"></div>
-  <div id="hint">Drag to rotate · Scroll to zoom</div>
+  <div id="hint">Drag to rotate · Scroll to zoom· Shift+Drag to Pan</div>
 </div>
 
 <script type="importmap">
@@ -603,11 +603,11 @@ const models = [
 
 const presets = [
   { id:'001', name:'ADRIATIQUE', a:'#A29115', b:'#5781F0', c:'#E3EADD' },
-  { id:'002', name:'VINARIJA',   a:'#c8a96e', b:'#f0e6d0', c:'#2a1a0e' },
-  { id:'003', name:'MASLINE',    a:'#7aab8a', b:'#e8f0e2', c:'#192b1f' },
+  { id:'002', name:'VINARIJA',   a:'#c8a96e', b:'#f0e6d0', c:'#C83C16' },
+  { id:'003', name:'MASLINE',    a:'#C0E52A', b:'#e8f0e2', c:'#197F1F' },
   { id:'004', name:'ZIDINE',     a:'#d4c5a0', b:'#f2ede0', c:'#201c14' },
   { id:'005', name:'KROSNA',     a:'#e84d6a', b:'#f0d4a8', c:'#1a0810' },
-  { id:'006', name:'ZEMLJA',     a:'#4d8ae8', b:'#e8dcc8', c:'#0a1020' },
+  { id:'006', name:'ZEMLJA',     a:'#9FE81A', b:'#49E8D0', c:'#0A1020' },
 ];
 
 const formats = [
