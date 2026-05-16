@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Krosna — Backdrop Generator</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+@font-face {
+  font-family: 'Simplon';
+  src: url('https://pub-01cd89e94ac94448830dc6f8b4548dbc.r2.dev/SimplonBPMono-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Simplon';
+  src: url('https://pub-01cd89e94ac94448830dc6f8b4548dbc.r2.dev/SimplonBPMono-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -19,7 +30,7 @@
 }
 
 body {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Simplon', monospace;
   font-size: 11px;
   background: var(--bg);
   color: var(--text);
@@ -96,11 +107,12 @@ body {
   justify-content: space-between;
   background: var(--bg2);
   border: 1px solid var(--border);
+  border-radius: 4px;
   padding: 9px 12px;
   cursor: pointer;
   width: 100%;
   color: var(--text);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Simplon', monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -118,14 +130,13 @@ body {
 
 .dropdown-panel {
   display: none;
-  position: absolute;
-  top: 0;
-  left: calc(100% + 6px);
+  position: fixed;
   width: 230px;
-  background: var(--bg2);
+  background: #212121;
   border: 1px solid var(--border);
-  z-index: 300;
-  box-shadow: 6px 6px 24px rgba(0,0,0,0.5);
+  border-radius: 4px;
+  z-index: 500;
+  box-shadow: 6px 6px 24px rgba(0,0,0,0.6);
 }
 .dropdown-panel.open { display: block; }
 
@@ -138,6 +149,8 @@ body {
   border-bottom: 1px solid var(--border);
   transition: background 0.1s;
 }
+.preset-opt:first-child { border-radius: 4px 4px 0 0; }
+.preset-opt:last-child  { border-radius: 0 0 4px 4px; border-bottom: none; }
 .preset-opt:last-child { border-bottom: none; }
 .preset-opt:hover, .preset-opt.active { background: var(--bg3); }
 
@@ -194,9 +207,10 @@ body {
   gap: 10px;
   background: var(--bg2);
   border: 1px solid var(--border);
+  border-radius: 4px;
   padding: 10px 14px;
   cursor: pointer;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Simplon', monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -293,11 +307,12 @@ input[type="range"]::-webkit-slider-thumb {
   justify-content: space-between;
   background: var(--bg2);
   border: 1px solid var(--border);
+  border-radius: 4px;
   padding: 10px 12px;
   cursor: pointer;
   width: 100%;
   color: var(--text);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Simplon', monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -314,8 +329,9 @@ input[type="range"]::-webkit-slider-thumb {
   position: absolute;
   bottom: calc(100% + 4px);
   left: 0; right: 0;
-  background: var(--bg2);
+  background: #212121;
   border: 1px solid var(--border);
+  border-radius: 4px;
   z-index: 300;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
 }
@@ -348,7 +364,7 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--bg);
   border: none;
   cursor: pointer;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Simplon', monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
@@ -468,20 +484,20 @@ input[type="range"]::-webkit-slider-thumb {
   <div class="section">
     <div class="section-label">Colour Map</div>
     <div class="colour-row">
-      <div class="colour-swatch" id="swatch-a" style="background:#e8d44d">
-        <input type="color" id="color-a" value="#e8d44d">
+      <div class="colour-swatch" id="swatch-a" style="background:#A29115">
+        <input type="color" id="color-a" value="#A29115">
       </div>
       <span class="colour-label">Shadow Ink</span>
     </div>
     <div class="colour-row">
-      <div class="colour-swatch" id="swatch-b" style="background:#a8cfd1">
-        <input type="color" id="color-b" value="#a8cfd1">
+      <div class="colour-swatch" id="swatch-b" style="background:#5781F0">
+        <input type="color" id="color-b" value="#5781F0">
       </div>
       <span class="colour-label">Light Ink</span>
     </div>
     <div class="colour-row">
-      <div class="colour-swatch" id="swatch-c" style="background:#1a1a18">
-        <input type="color" id="color-c" value="#1a1a18">
+      <div class="colour-swatch" id="swatch-c" style="background:#E3EADD">
+        <input type="color" id="color-c" value="#E3EADD">
       </div>
       <span class="colour-label">Background</span>
     </div>
@@ -540,7 +556,7 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="section-label">Output Format</div>
     <div class="format-wrap">
       <div class="format-trigger" id="format-trigger">
-        <span id="format-label">IG POST / 1080×1080</span>
+        <span id="format-label">FREE / FULLSCREEN</span>
         <span class="format-arrow">▼</span>
       </div>
       <div class="format-panel" id="format-panel"></div>
@@ -586,7 +602,7 @@ const models = [
 ];
 
 const presets = [
-  { id:'001', name:'ADRIATIQUE', a:'#e8d44d', b:'#a8cfd1', c:'#1a1a18' },
+  { id:'001', name:'ADRIATIQUE', a:'#A29115', b:'#5781F0', c:'#E3EADD' },
   { id:'002', name:'VINARIJA',   a:'#c8a96e', b:'#f0e6d0', c:'#2a1a0e' },
   { id:'003', name:'MASLINE',    a:'#7aab8a', b:'#e8f0e2', c:'#192b1f' },
   { id:'004', name:'ZIDINE',     a:'#d4c5a0', b:'#f2ede0', c:'#201c14' },
@@ -605,9 +621,9 @@ const formats = [
 
 // STATE
 const state = {
-  colorA:'#e8d44d', colorB:'#a8cfd1', colorC:'#1a1a18',
+  colorA:'#A29115', colorB:'#5781F0', colorC:'#E3EADD',
   angle:45, height:60, scale:100, contrast:50, grainAmt:18,
-  misreg:false, showBg:true, formatIdx:0,
+  misreg:false, showBg:true, formatIdx:5,
 };
 
 let currentModelIdx = 0, currentMesh = null, gradientMap = null;
@@ -794,12 +810,22 @@ presets.forEach((p,i) => {
 });
 
 triggerChips.innerHTML = chipHTML(presets[0]);
+// Sync swatches to initial state colours
+document.getElementById('swatch-a').style.background = state.colorA;
+document.getElementById('swatch-b').style.background = state.colorB;
+document.getElementById('swatch-c').style.background = state.colorC;
 
 presetTrigger.addEventListener('click', e => {
   e.stopPropagation();
   const open = presetPanel.classList.contains('open');
   closeAll();
-  if (!open) { presetPanel.classList.add('open'); presetTrigger.classList.add('open'); }
+  if (!open) {
+    const rect = presetTrigger.getBoundingClientRect();
+    presetPanel.style.top  = rect.top + 'px';
+    presetPanel.style.left = (rect.right + 8) + 'px';
+    presetPanel.classList.add('open');
+    presetTrigger.classList.add('open');
+  }
 });
 
 function applyPreset(p) {
@@ -822,7 +848,7 @@ const formatLabelEl = document.getElementById('format-label');
 
 formats.forEach((f,i) => {
   const opt = document.createElement('div');
-  opt.className = 'format-opt' + (i===0?' active':'');
+  opt.className = 'format-opt' + (i===5?' active':'');
   opt.textContent = f.label;
   opt.addEventListener('click', e => {
     e.stopPropagation();
